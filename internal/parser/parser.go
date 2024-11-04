@@ -4,7 +4,7 @@ import (
 	"errors"
 
 	"github.com/kotsmile/jql/internal/lexer/token"
-	"github.com/kotsmile/jql/internal/logger"
+	"github.com/kotsmile/jql/util"
 )
 
 type tokenInterator interface {
@@ -13,10 +13,10 @@ type tokenInterator interface {
 
 type parser struct {
 	tokens tokenInterator
-	logger logger.Logger
+	logger util.Logger
 }
 
-func New(i tokenInterator, logger logger.Logger) *parser {
+func New(i tokenInterator, logger util.Logger) *parser {
 	return &parser{
 		tokens: i,
 		logger: logger,

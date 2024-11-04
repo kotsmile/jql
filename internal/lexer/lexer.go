@@ -6,7 +6,7 @@ import (
 	"unicode/utf8"
 
 	"github.com/kotsmile/jql/internal/lexer/token"
-	"github.com/kotsmile/jql/internal/logger"
+	"github.com/kotsmile/jql/util"
 )
 
 var (
@@ -24,10 +24,10 @@ type lexer struct {
 	index   int
 	cmd     string
 	cmdLeft string
-	logger  logger.Logger
+	logger  util.Logger
 }
 
-func New(logger logger.Logger) *lexer {
+func New(logger util.Logger) *lexer {
 	return &lexer{
 		index:  0,
 		logger: logger,
@@ -65,7 +65,7 @@ func (p *lexer) Next() (t *token.Token, err error) {
 	}
 
 	if t != nil {
-		p.logger.WithFields(map[string]interface{}{
+		p.logger.WithFields(util.LoggerFields{
 			"type":  t.Type(),
 			"value": t.Value(),
 		}).Debug("token")

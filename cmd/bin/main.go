@@ -9,8 +9,8 @@ import (
 
 	"github.com/kotsmile/jql/internal/engine"
 	"github.com/kotsmile/jql/internal/lexer"
-	"github.com/kotsmile/jql/internal/logger"
 	"github.com/kotsmile/jql/internal/parser"
+	"github.com/kotsmile/jql/util"
 )
 
 func main() {
@@ -19,7 +19,7 @@ func main() {
 	flag.BoolVar(&debug, "debug", false, "debug mode")
 	flag.Parse()
 
-	logger := logger.New(debug)
+	logger := util.NewLogger(debug)
 	e := engine.New()
 
 	for {

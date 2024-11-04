@@ -5,7 +5,7 @@ import (
 	"testing"
 
 	"github.com/kotsmile/jql/internal/lexer/token"
-	"github.com/kotsmile/jql/internal/logger"
+	"github.com/kotsmile/jql/util"
 )
 
 func Test_NextWord(t *testing.T) {
@@ -138,7 +138,7 @@ func Test_Next(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			lexer := New(logger.NewTest())
+			lexer := New(util.NewLoggerTest())
 			lexer.Lex(tt.args.s)
 
 			got, err := lexer.Next()
