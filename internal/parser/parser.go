@@ -50,7 +50,7 @@ func (p *parser) Parse() ([]*astNode, error) {
 	}
 
 	for i, q := range queries {
-		p.logger.Debugf("Query: %d\n"+q.String(), i+1)
+		p.logger.Debugf("Query: %d\n"+q.String()+"\n", i+1)
 	}
 
 	return queries, nil
