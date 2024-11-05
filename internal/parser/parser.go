@@ -7,6 +7,13 @@ import (
 	"github.com/kotsmile/jql/util"
 )
 
+var (
+	ErrUnknownKeyword              = errors.New("unknown keyword")
+	ErrUnexpectedToken             = errors.New("unexpected token")
+	ErrMissingFileNameLoadCommand  = errors.New("missing file name for 'load' command")
+	ErrMissingTableNameLoadCommand = errors.New("missing table name for 'load' command")
+)
+
 type tokenInterator interface {
 	Next() (*token.Token, error)
 }
@@ -68,7 +75,7 @@ func (p *parser) parseNode(tokens []token.Token) (*astNode, error) {
 		switch cmdToken.Value() {
 		case LoadKeyword.String():
 			if len(tokens) < 2 {
-				return nil, errors.New("missing file name for load command")
+				return nil, ErrMissingFileNameLoadCommand
 			}
 
 			filenameToken := tokens[1]
@@ -86,7 +93,7 @@ func (p *parser) parseNode(tokens []token.Token) (*astNode, error) {
 			asToken := tokens[0]
 			if asToken.Is(token.Word) && asToken.Value() == AsKeyword.String() {
 				if len(tokens) < 2 {
-					return nil, errors.New("missing table name for load command")
+					return nil, ErrMissingTableNameLoadCommand
 				}
 
 				tablenameToken := tokens[1]
@@ -99,10 +106,10 @@ func (p *parser) parseNode(tokens []token.Token) (*astNode, error) {
 			}
 
 		default:
-			return nil, errors.New("unknown keyword")
+			return nil, ErrUnknownKeyword
 		}
 	} else {
-		return nil, errors.New("unexpected token")
+		return nil, ErrUnexpectedToken
 	}
 
 skip:

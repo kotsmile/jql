@@ -32,11 +32,9 @@ func (n *astNode) String() string {
 	return n.stringHelper("", true, true)
 }
 
-// Recursive helper for the String function
 func (n *astNode) stringHelper(prefix string, isLast bool, isRoot bool) string {
 	var sb strings.Builder
 
-	// Add the current node's representation
 	sb.WriteString(prefix)
 	if isRoot {
 	} else if isLast {
@@ -47,7 +45,6 @@ func (n *astNode) stringHelper(prefix string, isLast bool, isRoot bool) string {
 	sb.WriteString(fmt.Sprintf("[%s: %s]", n.value.Type(), n.value.Value()))
 	sb.WriteString("\n")
 
-	// Prepare prefix for the next level
 	childPrefix := prefix
 	if isRoot {
 	} else if isLast {
@@ -56,7 +53,6 @@ func (n *astNode) stringHelper(prefix string, isLast bool, isRoot bool) string {
 		childPrefix += "|   "
 	}
 
-	// Recursively print each child with the adjusted prefix
 	for i, child := range n.children {
 		sb.WriteString(child.stringHelper(childPrefix, i == len(n.children)-1, false))
 	}

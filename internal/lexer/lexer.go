@@ -9,6 +9,8 @@ import (
 	"github.com/kotsmile/jql/util"
 )
 
+var ErrUnterminatedString = errors.New("unterminated string")
+
 var (
 	separators = []rune{' ', '\t', '\n', '\r'}
 	symbols    = []rune{
@@ -51,7 +53,7 @@ func (p *lexer) Next() (t *token.Token, err error) {
 	} else if word[0] == '"' {
 		index := strings.Index(rest, "\"")
 		if index == -1 {
-			return nil, errors.New("unterminated string")
+			return nil, ErrUnterminatedString
 		}
 
 		content := word[1:] + rest[:index]
