@@ -18,7 +18,7 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 )
 
-func execute(cmd string, db *sql.DB, logger util.Logger) error {
+func processCmd(cmd string, db *sql.DB, logger util.Logger) error {
 	if strings.HasPrefix(cmd, "load") {
 		lexer := lexer.New(logger)
 		lexer.Lex(cmd)
@@ -150,7 +150,7 @@ func execute(cmd string, db *sql.DB, logger util.Logger) error {
 	for _, col := range columns {
 		fmt.Fprintf(writer, "%s\t", col)
 	}
-	fmt.Fprintln(writer) // Newline after headers
+	fmt.Fprintln(writer)
 
 	values := make([]interface{}, len(columns))
 	valuePtrs := make([]interface{}, len(columns))
@@ -217,7 +217,7 @@ func main() {
 		cmd, _ := reader.ReadString('\n')
 		cmd = strings.TrimSpace(cmd)
 
-		if err := execute(cmd, db, logger); err != nil {
+		if err := processCmd(cmd, db, logger); err != nil {
 			logger.Errorf("failed to execute command: %s", err)
 		}
 	}
