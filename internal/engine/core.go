@@ -11,6 +11,7 @@ import (
 
 	"github.com/kotsmile/jql/internal/parser"
 	"github.com/kotsmile/jql/internal/tableui"
+	"github.com/kotsmile/jql/util"
 )
 
 var (
@@ -18,6 +19,7 @@ var (
 	ErrLoadWrongTypeFilename = errors.New("'load' command: wrong type for filename")
 	ErrLoadAsExpected        = errors.New("'load' command: expected 'as' keyword")
 	ErrLoadExpectedTableName = errors.New("'load' command: expected table name")
+	ErrUnknownCommand        = errors.New("unknown command")
 )
 
 type Engine struct {
@@ -32,16 +34,25 @@ func New(w io.Writer) *Engine {
 	}
 }
 
+func (e *Engine) GetTable(tablename string) (*Table, error) {
+	table, ok := e.loadedTables[tablename]
+	if !ok {
+		return nil, fmt.Errorf("table '%s' not found", tablename)
+	}
+	return table, nil
+}
+
 func (e *Engine) Process(query *parser.AstNode) error {
 	switch value := query.Value().(type) {
 	case *parser.KeywordNode:
 		switch value.Value() {
 		case parser.LoadKeyword.String():
-			if len(query.Children()) < 1 {
+			filenameNode, ok := util.At(query.Children(), 0)
+			if !ok {
 				return ErrLoadMissingFilename
 			}
 
-			filename, ok := query.Children()[0].Value().(parser.StringNode)
+			filename, ok := filenameNode.Value().(parser.StringNode)
 			if !ok {
 				return ErrLoadWrongTypeFilename
 			}
@@ -49,8 +60,9 @@ func (e *Engine) Process(query *parser.AstNode) error {
 			index := strings.Index(filename.Value(), ".json")
 			var tablename parser.StringNode = parser.StringNode(filepath.Base(filename.Value()[:index]))
 
-			if len(query.Children()) > 1 {
-				asCommand, ok := query.Children()[1].Value().(*parser.KeywordNode)
+			asNode, ok := util.At(query.Children(), 1)
+			if ok {
+				asCommand, ok := asNode.Value().(*parser.KeywordNode)
 				if !ok {
 					return ErrLoadAsExpected
 				}
@@ -58,11 +70,12 @@ func (e *Engine) Process(query *parser.AstNode) error {
 					return ErrLoadAsExpected
 				}
 
-				if len(query.Children()[1].Children()) < 1 {
+				tablenameNode, ok := util.At(asNode.Children(), 0)
+				if !ok {
 					return ErrLoadExpectedTableName
 				}
 
-				tablename, ok = query.Children()[1].Children()[0].Value().(parser.StringNode)
+				tablename, ok = tablenameNode.Value().(parser.StringNode)
 				if !ok {
 					return ErrLoadExpectedTableName
 				}
@@ -72,17 +85,16 @@ func (e *Engine) Process(query *parser.AstNode) error {
 				return fmt.Errorf("failed to load table: %w", err)
 			}
 
-			e.writer.Write([]byte(fmt.Sprintf("Loaded table '%s'\n", tablename.Value())))
+			fmt.Fprintf(e.writer, "Loaded table '%s'\n", tablename.Value())
 		case parser.TablesKeyword.String():
 			for name := range e.loadedTables {
-				e.writer.Write([]byte(fmt.Sprintf("%s\n", name)))
+				fmt.Fprintf(e.writer, "  - %s\n", name)
 			}
 		case parser.SelectKeyword.String():
-			if len(query.Children()) < 1 {
+			fromNode, ok := util.At(query.Children(), len(query.Children())-1)
+			if !ok {
 				return fmt.Errorf("'select' command: missing columns")
 			}
-
-			fromNode := query.Children()[len(query.Children())-1]
 			if _, ok := fromNode.Value().(*parser.KeywordNode); !ok {
 				return fmt.Errorf("'select' command: missing 'from' keyword")
 			}
@@ -96,11 +108,12 @@ func (e *Engine) Process(query *parser.AstNode) error {
 				columns = append(columns, c.Value())
 			}
 
-			if len(fromNode.Children()) != 1 {
+			tablenameNode, ok := util.At(fromNode.Children(), 0)
+			if !ok {
 				return fmt.Errorf("'select' command: wrong number of arguments for 'from' keyword")
 			}
 
-			tablename, ok := fromNode.Children()[0].Value().(parser.StringNode)
+			tablename, ok := tablenameNode.Value().(parser.StringNode)
 			if !ok {
 				return fmt.Errorf("'select' command: wrong type for table name")
 			}
@@ -108,10 +121,13 @@ func (e *Engine) Process(query *parser.AstNode) error {
 				return fmt.Errorf("failed to select columns: %w", err)
 			}
 
+		default:
+			return ErrUnknownCommand
+
 		}
 
 	default:
-		return errors.New("unknown command")
+		return ErrUnknownCommand
 	}
 
 	return nil

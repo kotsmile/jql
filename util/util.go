@@ -1,6 +1,6 @@
 package util
 
-func At[T any](index int, slice []T) (T, bool) {
+func At[T any](slice []T, index int) (T, bool) {
 	var t T
 	if index < len(slice) {
 		t = slice[index]

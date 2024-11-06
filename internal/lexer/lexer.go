@@ -12,8 +12,8 @@ import (
 var ErrUnterminatedString = errors.New("unterminated string")
 
 var (
-	separators = []rune{' ', '\t', '\n', '\r'}
-	symbols    = []rune{
+	Separators = []rune{' ', '\t', '\n', '\r'}
+	Symbols    = []rune{
 		/* parentheses */ '(', ')', '[', ']', '{', '}',
 		/* arithmetic */ '+', '-', '/', '%', '*',
 		/* punctuation */ ',', ':', ';', '\'', '"', '.',
@@ -42,7 +42,7 @@ func (p *lexer) Lex(cmd string) {
 }
 
 func (p *lexer) Next() (t *token.Token, err error) {
-	word, rest := nextWord(p.cmdLeft, separators, symbols)
+	word, rest := NextWord(p.cmdLeft, Separators, Symbols)
 	p.cmdLeft = rest
 
 	if word == "" {
@@ -104,7 +104,7 @@ func (p *lexer) Collect() ([]token.Token, error) {
 	return tokens, nil
 }
 
-func nextWord(input string, whitespaces []rune, special []rune) (string, string) {
+func NextWord(input string, whitespaces []rune, special []rune) (string, string) {
 	whitespacesMap := make(map[rune]struct{})
 	for _, w := range whitespaces {
 		whitespacesMap[w] = struct{}{}

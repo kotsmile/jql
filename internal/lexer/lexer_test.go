@@ -61,7 +61,7 @@ func Test_NextWord(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got0, got1 := nextWord(tt.args.s, separators, symbols)
+			got0, got1 := NextWord(tt.args.s, Separators, Symbols)
 
 			if got0 != tt.want0 || got1 != tt.want1 {
 				t.Errorf(

@@ -58,7 +58,7 @@ func (n *AstNode) stringHelper(prefix string, isLast bool, isRoot bool) string {
 	} else if isLast {
 		childPrefix += "    "
 	} else {
-		childPrefix += "|   "
+		childPrefix += "│   "
 	}
 
 	for i, child := range n.children {
