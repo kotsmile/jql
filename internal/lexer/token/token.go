@@ -11,7 +11,7 @@ const (
 	// Number
 	// Boolean
 	// Null
-	// Comma
+	Comma = "comma"
 	// Colon
 	// Period
 	// Equal

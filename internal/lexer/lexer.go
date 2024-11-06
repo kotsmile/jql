@@ -50,6 +50,8 @@ func (p *lexer) Next() (t *token.Token, err error) {
 		err = nil
 	} else if word == ";" {
 		t = token.New(token.Semicolon, word)
+	} else if word == "," {
+		t = token.New(token.Comma, word)
 	} else if word[0] == '"' {
 		index := strings.Index(rest, "\"")
 		if index == -1 {
