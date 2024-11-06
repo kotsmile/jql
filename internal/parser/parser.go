@@ -8,10 +8,12 @@ import (
 )
 
 var (
-	ErrUnknownKeyword              = errors.New("unknown keyword")
-	ErrUnexpectedToken             = errors.New("unexpected token")
-	ErrMissingFileNameLoadCommand  = errors.New("missing file name for 'load' command")
-	ErrMissingTableNameLoadCommand = errors.New("missing table name for 'load' command")
+	ErrUnknownKeyword                = errors.New("unknown keyword")
+	ErrUnexpectedToken               = errors.New("unexpected token")
+	ErrMissingFileNameLoadCommand    = errors.New("missing file name for 'load' command")
+	ErrMissingTableNameLoadCommand   = errors.New("missing table name for 'load' command")
+	ErrMissingFromKeyword            = errors.New("'select' command: missing 'from' keyword")
+	ErrMissingTableNameSelectCommand = errors.New("'select' command: missing table name")
 )
 
 type tokenInterator interface {
@@ -30,8 +32,8 @@ func New(i tokenInterator, logger util.Logger) *parser {
 	}
 }
 
-func (p *parser) Parse() ([]*astNode, error) {
-	var queries []*astNode
+func (p *parser) Parse() ([]*AstNode, error) {
+	var queries []*AstNode
 
 	var tokens []token.Token
 	for {
@@ -63,12 +65,12 @@ func (p *parser) Parse() ([]*astNode, error) {
 	return queries, nil
 }
 
-func (p *parser) parseNode(tokens []token.Token) (*astNode, error) {
+func (p *parser) parseNode(tokens []token.Token) (*AstNode, error) {
 	if len(tokens) == 0 {
 		return nil, nil
 	}
 
-	var root *astNode = &astNode{}
+	var root *AstNode = &AstNode{}
 
 	cmdToken := tokens[0]
 	if cmdToken.Is(token.Word) {
@@ -104,6 +106,43 @@ func (p *parser) parseNode(tokens []token.Token) (*astNode, error) {
 					tokens = tokens[2:]
 				}
 			}
+		case TablesKeyword.String():
+			root.value = NewKeyword(TablesKeyword)
+			return root, nil
+		case SelectKeyword.String():
+			root.value = NewKeyword(SelectKeyword)
+			if len(tokens) < 2 {
+				return nil, ErrMissingFromKeyword
+			}
+
+			foundFromKeyword := false
+			index := 1
+			for _, t := range tokens[1:] {
+				if t.Is(token.Word) && t.Value() == FromKeyword.String() {
+					foundFromKeyword = true
+					break
+				}
+
+				if t.Value() != "," {
+					root.AppendChild(NewAstNode(StringNode(t.Value())))
+				}
+				index++
+			}
+			if !foundFromKeyword {
+				return nil, ErrMissingFromKeyword
+			}
+
+			fromKeyword := NewAstNode(NewKeyword(FromKeyword))
+			root.AppendChild(fromKeyword)
+
+			if len(tokens) < index+1 {
+				return nil, ErrMissingTableNameSelectCommand
+			}
+			for _, t := range tokens[index+1:] {
+				fromKeyword.AppendChild(NewAstNode(StringNode(t.Value())))
+			}
+
+			return root, nil
 
 		default:
 			return nil, ErrUnknownKeyword

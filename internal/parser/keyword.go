@@ -3,8 +3,11 @@ package parser
 type KeywordType string
 
 const (
-	LoadKeyword KeywordType = "load"
-	AsKeyword   KeywordType = "as"
+	LoadKeyword   KeywordType = "load"
+	TablesKeyword KeywordType = "tables"
+	AsKeyword     KeywordType = "as"
+	SelectKeyword KeywordType = "select"
+	FromKeyword   KeywordType = "from"
 )
 
 func NewKeyword(type_ KeywordType) *KeywordNode {

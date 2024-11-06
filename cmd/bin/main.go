@@ -20,7 +20,9 @@ func main() {
 	flag.Parse()
 
 	logger := util.NewLogger(debug)
-	e := engine.New()
+	e := engine.New(os.Stdout)
+
+	e.LoadTable("./examples/simple.json", "simple")
 
 	for {
 		reader := bufio.NewReader(os.Stdin)

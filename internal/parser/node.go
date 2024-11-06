@@ -10,29 +10,37 @@ type Node interface {
 	Type() string
 }
 
-type astNode struct {
-	children []*astNode
+type AstNode struct {
+	children []*AstNode
 	value    Node
 }
 
-type Query *astNode
+type Query *AstNode
 
-func NewAstNode(t Node) *astNode {
-	return &astNode{
+func NewAstNode(t Node) *AstNode {
+	return &AstNode{
 		value:    t,
-		children: make([]*astNode, 0),
+		children: make([]*AstNode, 0),
 	}
 }
 
-func (n *astNode) AppendChild(c *astNode) {
+func (n *AstNode) AppendChild(c *AstNode) {
 	n.children = append(n.children, c)
 }
 
-func (n *astNode) String() string {
+func (n *AstNode) String() string {
 	return n.stringHelper("", true, true)
 }
 
-func (n *astNode) stringHelper(prefix string, isLast bool, isRoot bool) string {
+func (n *AstNode) Value() Node {
+	return n.value
+}
+
+func (n *AstNode) Children() []*AstNode {
+	return n.children
+}
+
+func (n *AstNode) stringHelper(prefix string, isLast bool, isRoot bool) string {
 	var sb strings.Builder
 
 	sb.WriteString(prefix)
