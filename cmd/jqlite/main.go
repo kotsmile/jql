@@ -97,7 +97,6 @@ func execute(cmd string, db *sql.DB, logger util.Logger) error {
 						valueJSON := string(valueJSONBytes)
 						valueString, ok := value.(string)
 						if ok {
-							fmt.Println("OK", value, valueString)
 							valueJSON = valueString
 						}
 
@@ -208,7 +207,9 @@ func main() {
 		logger.Fatalf("Failed to connect to database: %v", err)
 	}
 
-	execute("load \"./examples/simple.json\" as simple;", db, logger)
+	// if debug {
+	// 	execute("load \"./examples/simple.json\" as simple;", db, logger)
+	// }
 
 	for {
 		reader := bufio.NewReader(os.Stdin)
